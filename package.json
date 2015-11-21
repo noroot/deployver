@@ -1,0 +1,20 @@
+{
+  "name": "deployver",
+  "version": "1.0.0",
+  "description": "Deployment tool inspired by capistrano",
+  "main": "deployver.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "deploy",
+    "ssh",
+    "ci"
+  ],
+  "author": "Dmitry Rodichev <seogarry@gmail.com> (http://blog.overmind.be)",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.1.2",
+    "promise": "^7.0.4"
+  }
+}
