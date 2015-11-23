@@ -16,12 +16,12 @@ var Deployver = function(config) {
     this.releaseDir = false;
 
     this.log = function(str) {
-        console.log(str.green)
+        console.log('[Deployver]: ' + str.green)
     }
 
     this.debug = function(str) {
         if (this.config.debug) {
-            console.log(str.yellow);
+            console.log('[Deployver debug]: ' + str.yellow);
         }
     }
 
@@ -62,19 +62,26 @@ var Deployver = function(config) {
 Deployver.prototype.deploy = function() {
 
     var self = this;
-    var cmd = Util.format('ssh %s "cd %s/releases/ && mkdir %s"',
-                          this.config.ssh,
-                          this.config.paths.remote,
-                          this.setReleaseDir());
 
-    this.log('Exec ' + cmd);
-    this.exec(cmd).then(function(result) {
-        self.copy();
-        self.link(self.getReleaseDir());
-        self.rotate();
-    }, function(err) {
-        self.log(err);
+    var promise = new Promise(function (resolve, reject) {
+
+        var cmd = Util.format('ssh %s "cd %s/releases/ && mkdir %s"',
+                              self.config.ssh,
+                              self.config.paths.remote,
+                              self.setReleaseDir());
+
+        self.log('Exec ' + cmd);
+        self.exec(cmd).then(function(result) {
+            self.copy();
+            self.link(self.getReleaseDir());
+            self.rotate();
+            resolve(result);
+        }, function(err) {
+            self.log(err);
+            reject(err);
+        });
     });
+    return promise;
 }
 
 Deployver.prototype.copy = function() {
@@ -94,22 +101,28 @@ Deployver.prototype.copy = function() {
     });
 }
 
+
 Deployver.prototype.init = function() {
 
     var self = this;
-    var cmd = Util.format('ssh %s "cd %s && mkdir releases shared tmp"',
-                          this.config.ssh,
-                          this.config.paths.remote);
 
-    this.log('Exec ' + cmd);
-    this.exec(cmd).then(function(result) {
-        self.log(result.red);
-    }, function(err) {
-        self.debug(err);
+    var promise = new Promise(function(resolve, reject) {
+        var cmd = Util.format('ssh %s "cd %s && mkdir releases shared tmp"',
+                              self.config.ssh,
+                              self.config.paths.remote);
+
+        self.log('Exec ' + cmd);
+        self.exec(cmd).then(function(result) {
+            self.log(result.red);
+            resolve(result);
+        }, function(err) {
+            self.debug(err);
+            reject(err);
+        });
     });
+
+    return promise;
 }
-
-
 
 
 Deployver.prototype.rotate = function() {
@@ -124,7 +137,7 @@ Deployver.prototype.rotate = function() {
 
         var releases = result.split(/\n/g);
         releases = releases.filter(function(x) { if (x == '') return false; else return x; });
-        
+
         if (releases.length > self.config.keep) {
             releases = releases.sort().reverse();
             toRemove = releases.slice(self.config.keep);
@@ -137,12 +150,11 @@ Deployver.prototype.rotate = function() {
 
             self.log('Exec ' + removeCmd);
             self.exec(removeCmd).then(function(result) {
-                self.log(result);
-            }, function(err){
-                self.log(err)
+                if (result) self.log(result);
+            }, function(err) {
+                if (err) self.log(err);
             });
         }
-        
     }, function(err) {
         self.debug(err);
     });
@@ -150,32 +162,42 @@ Deployver.prototype.rotate = function() {
 
 
 Deployver.prototype.rollback = function() {
-    
-    var self = this;
-    var cmd = Util.format('ssh %s "cd %s/releases && ls"',
-                          this.config.ssh,
-                          this.config.paths.remote);
 
-    this.log('Exec ' + cmd);
-    this.exec(cmd).then(function(result) {
-        var releases = result.split(/\n/g);
-        releases = releases.filter(function(x) { if (x == '') return false; else return x; });
-        if (releases.length >= 2 ) {
-            
-            releases = releases.sort().reverse();
-            currentRelease = releases[0];
-            toRollback = releases[1];
-            console.log(releases);
-            self.link(toRollback);
-            self.remove(currentRelease);
-            self.log('Rolling back to ' + toRollback);
-        } else {
-            self.log('No rollback possible');
-        }
-        
-    }, function(err) {
-        self.debug(err);
+    var self = this;
+
+    var promise = new Promise(function (resolve, reject) {
+
+        var cmd = Util.format('ssh %s "cd %s/releases && ls"',
+                              self.config.ssh,
+                              self.config.paths.remote);
+
+        self.log('Exec ' + cmd);
+        self.exec(cmd).then(function(result) {
+            var releases = result.split(/\n/g);
+            releases = releases.filter(function(x) { if (x == '') return false; else return x; });
+            if (releases.length >= 2 ) {
+
+                releases = releases.sort().reverse();
+                currentRelease = releases[0];
+                toRollback = releases[1];
+                self.link(toRollback);
+                self.remove(currentRelease);
+                self.log('Rolling back to ' + toRollback);
+                resolve(toRollback);
+            } else {
+                self.log('No rollback possible');
+            }
+
+        }, function(err) {
+            if (err) {
+                self.debug(err);
+                reject(err);
+            }
+        });
     });
+
+
+    return promise;
 }
 
 
@@ -197,7 +219,6 @@ Deployver.prototype.remove = function(release) {
 }
 
 
-
 Deployver.prototype.link = function(release) {
 
     var self = this;
@@ -214,6 +235,7 @@ Deployver.prototype.link = function(release) {
         this.log(err);
     });
 }
+
 
 module.exports = function(config) {
     return new Deployver(config);
