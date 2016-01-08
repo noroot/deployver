@@ -40,6 +40,12 @@ Deployver.rollback() - rollback it
 
 See *gulp.example.coffee* (included in repo)
 
+### Change log
+#### 1.0.2
+- Minor bugfix on init method to create releases current stub directory
+
+
+
 ### Credits
 
 Author: Dmitry Rodichev (@noroot)

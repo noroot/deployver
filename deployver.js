@@ -107,7 +107,7 @@ Deployver.prototype.init = function() {
     var self = this;
 
     var promise = new Promise(function(resolve, reject) {
-        var cmd = Util.format('ssh %s "cd %s && mkdir releases shared tmp"',
+        var cmd = Util.format('ssh %s "cd %s && mkdir releases shared tmp releases/current"',
                               self.config.ssh,
                               self.config.paths.remote);
 
@@ -222,7 +222,7 @@ Deployver.prototype.remove = function(release) {
 Deployver.prototype.link = function(release) {
 
     var self = this;
-    var cmd = Util.format('ssh %s "cd %s && rm current &&ln -s releases/%s current"',
+    var cmd = Util.format('ssh %s "cd %s && rm current && ln -s releases/%s current"',
                           this.config.ssh,
                           this.config.paths.remote,
                           release
