@@ -222,7 +222,7 @@ Deployver.prototype.remove = function(release) {
 Deployver.prototype.link = function(release) {
 
     var self = this;
-    var cmd = Util.format('ssh %s "cd %s && rm current && ln -s releases/%s current"',
+    var cmd = Util.format('ssh %s "cd %s && rm -rf current && ln -s releases/%s current"',
                           this.config.ssh,
                           this.config.paths.remote,
                           release
