@@ -17,7 +17,7 @@ Fast deployment tool for anything that works via ssh.
 
 **paths** - object with two paths *local* for from and remote for *to*
 
-Thats all, it's damn simple.
+Thats all, it's damn simple. Don't forget to call Deployver.init() method to initialize remote directory strucutre.
 
 ### Usage
 
@@ -32,7 +32,7 @@ deployConfig =
 
 Deployver = require('deployver')(deployConfig)
 
-
+Deployver.init() - initialize directories structure on remote server
 Deployver.deploy() - push something to 
 Deployver.rollback() - rollback it
 
@@ -41,6 +41,9 @@ Deployver.rollback() - rollback it
 See *gulp.example.coffee* (included in repo)
 
 ### Change log
+#### 1.0.4
+- Add README line about Deployver.init() method for initializing deployment directory structure on remote server
+
 #### 1.0.3
 - Minor bugfix on init method to create releases current stub directory
 
