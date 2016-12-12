@@ -1,6 +1,6 @@
 {
   "name": "deployver",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Deployment tool inspired by capistrano",
   "main": "deployver.js",
   "scripts": {
