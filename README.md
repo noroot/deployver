@@ -38,7 +38,7 @@ Deployver.rollback() - rollback it
 
 ```
 
-See *gulp.example.coffee* (included in repo)
+See *gulp.example.js* *gulp.example.coffee* (included in repo)
 
 ### Change log
 #### 1.0.4
